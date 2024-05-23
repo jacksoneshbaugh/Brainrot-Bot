@@ -12,6 +12,10 @@ def test_tts():
 
 def test_narrative():
     narratives = narrative.scrape_narratives(5)
+
+    for n in narratives:
+        n.to_audio(file_path=os.getcwd() + "/testmantests/audiotests/narrativetests")
+
     assert len(narratives) == 5
 
 

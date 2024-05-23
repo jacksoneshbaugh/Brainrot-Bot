@@ -1,15 +1,19 @@
 __author__ = "Jackson Eshbaugh"
 __version__ = "05/23/2024"
 
-import os.path
-
+import os
 import random
 import time
-
-import requests
-from bs4 import BeautifulSoup, ResultSet, PageElement
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium.webdriver.remote.webelement import WebElement
 
 from reddit_tts_bot.tts import tts
+
 
 MAX_WORDS_PER_PART = 140
 
@@ -82,14 +86,16 @@ class Narrative:
 locations: tuple = ("r/tifu", "r/entitledparents", "r/AmItheAsshole")
 
 DEFAULT_MIN_WORD_COUNT: int = 100
+SCROLL_PAUSE_TIME: int = 3
 
 
-def scrape_narratives(num_narratives: int, min_word_count: int = DEFAULT_MIN_WORD_COUNT, locations: list = locations) -> list:
+def scrape_narratives(num_narratives: int, min_word_count: int = DEFAULT_MIN_WORD_COUNT,
+                      locations: list = locations) -> list:
     """
     This function scrapes narratives from Reddit.
     :param num_narratives: The number of narratives to scrape
-    :param min_upvotes: The minimum number of upvotes for a post
     :param min_word_count: The minimum word count for a post
+    :param locations: The locations (subreddits) to scrape from
     :return: A list of Narrative objects
     """
 
@@ -100,60 +106,60 @@ def scrape_narratives(num_narratives: int, min_word_count: int = DEFAULT_MIN_WOR
 
     narratives = []
 
-    for i in range(num_narratives):
-        # Choose a random location to pull stories from
-        location = random.choice(locations)
+    # Set up the Selenium WebDriver for Firefox
+    options = FirefoxOptions()
+    options.add_argument("--start-maximized")
+    driver: WebDriver = webdriver.Firefox(service=FirefoxService(), options=options)
 
-        print("Scraping from " + location)
-
-        # Scrape the story
-        time.sleep(5)
-        page: requests.Response = requests.get("https://www.reddit.com/" + location + "/top/?t=all")
-        soup: BeautifulSoup = BeautifulSoup(page.content, "html.parser")
-        posts: ResultSet = soup.find_all("article", class_="w-full m-0")
-
-        # Choose a random post
-        post: PageElement = random.choice(posts)
-
-        # Check if the post has already been scraped
-        while post["aria-label"] in open("narrative_names.txt").read():
+    try:
+        for i in range(num_narratives):
             # Choose a random location to pull stories from
             location = random.choice(locations)
 
-            print("[DUPLICATE FOUND] Scraping from " + location)
+            print("Scraping from " + location)
 
-            # Scrape the story
-            time.sleep(5)
-            page: requests.Response = requests.get("https://www.reddit.com/" + location + "/top/?t=all")
-            soup: BeautifulSoup = BeautifulSoup(page.content, "html.parser")
-            posts: ResultSet = soup.find_all("article", class_="w-full m-0")
+            # Open the URL
+            driver.get(f"https://www.reddit.com/{location}/top/?t=all")
+
+            # Get the articles
+            posts: list[WebElement] = driver.find_elements(By.TAG_NAME, 'article')
 
             # Choose a random post
-            post = random.choice(posts)
+            post: WebElement = random.choice(posts)
 
-        # Get the title (stored in the aria-label attribute of each post)
-        title: str = post["aria-label"]
+            while post.get_attribute('aria-label') in open("narrative_names.txt").read():
+                # Scroll the page a bit to load more content
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(SCROLL_PAUSE_TIME)
+                posts = driver.find_elements(By.TAG_NAME, 'article')
+                post = random.choice(posts)
 
-        # Write the title to the file to keep track of which posts have been scraped
-        with open("narrative_names.txt", "a") as file:
-            file.write(title + "\n")
+            # Get the title (stored in the aria-label attribute of each post)
+            title: str = post.get_attribute("aria-label")
 
-        # Get the content: go to the post's page and scrape the content
-        post_url: str = "https://reddit.com/" + post.find_next("a")["href"]
-        time.sleep(5)
-        post_page: requests.Response = requests.get(post_url)
-        post_soup: BeautifulSoup = BeautifulSoup(post_page.content, "html.parser")
-        content: str = post_soup.select_one('.md.text-14').text.strip()
-        content = content.replace('\n', ' ')
-        
-        # Check if the post meets the minimum word count requirement
-        if len(content.split()) < min_word_count:
-            i -= 1
-            continue
+            # Write the title to the file to keep track of which posts have been scraped
+            with open("narrative_names.txt", "a") as file:
+                file.write(title + "\n")
 
-        # Create a Narrative object
-        narrative = Narrative(content, title)
-        narratives.append(narrative)
+            # Get the content: go to the post's page and scrape the content
+            post_url: str = post.find_element(By.TAG_NAME, "a").get_attribute("href")
+            driver.get(post_url)
+            time.sleep(3)  # Wait for the page to load
+            post_soup: BeautifulSoup = BeautifulSoup(driver.page_source, "html.parser")
+            content_elem = post_soup.select_one('.md.text-14')
+            content: str = content_elem.text.strip() if content_elem else ""
+            content = content.replace('\n', ' ')
+
+            # Check if the post meets the minimum word count requirement
+            if len(content.split()) < min_word_count:
+                i -= 1
+                continue
+
+            # Create a Narrative object
+            narrative = Narrative(content, title)
+            narratives.append(narrative)
+
+    finally:
+        driver.quit()
 
     return narratives
-
