@@ -10,7 +10,8 @@
   - [x] Add functionality to export the narratives to a WAV file.
 
 - [ ] Video synthesis.
-  - [ ] From the pre-downloaded Minecraft parkour videos, randomly select one to use as the background gameplay.
+  - [ ] Find Subway Surfers gameplay to use, too!
+  - [ ] From the pre-downloaded Minecraft parkour videos and Subway Surfers gameplay videos, randomly select one to use as the background gameplay.
   - [ ] Randomly select time congruent to the length of the narrative within the gameplay video.
   - [ ] Add audio captions to the gameplay video.
     - [ ] Use OpenAI Whisper and moviepy to generate and add captions.
