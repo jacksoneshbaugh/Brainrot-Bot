@@ -54,11 +54,11 @@ class Narrative:
         """
         return self.text
 
-    def to_audio(self, file_path: str) -> None:
+    def to_audio(self, file_path: str) -> list[str]:
         """
         This function converts the text of the story to an audio file.
         :param file_path: The path to save the .wav file (parent directory)
-        :return: None
+        :return: The name(s) of the .wav file(s)
         """
 
         if self.word_count > MAX_WORDS_PER_PART:
@@ -76,9 +76,11 @@ class Narrative:
 
             # Save each part as an audio file
             for i, part in enumerate(parts):
-                tts(part, file_path, self.title + "_part" + str(i + 1))
+                tts(part, file_path, self.title + " Part " + str(i + 1))
+            return [self.title + ' Part ' + str(i + 1) + '.wav' for i in range(len(parts))]
         else:
             tts(self.text, file_path, self.title)
+            return [self.title + '.wav']
 
 
 # Scrape narratives from Reddit
@@ -135,7 +137,7 @@ def scrape_narratives(num_narratives: int, min_word_count: int = DEFAULT_MIN_WOR
                 post = random.choice(posts)
 
             # Get the title (stored in the aria-label attribute of each post)
-            title: str = post.get_attribute("aria-label")
+            title: str = post.get_attribute("aria-label").replace(":", "-").replace("/", "-")
 
             # Write the title to the file to keep track of which posts have been scraped
             with open("narrative_names.txt", "a") as file:

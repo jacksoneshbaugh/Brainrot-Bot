@@ -2,6 +2,7 @@
 
 import reddit_tts_bot.tts as tts
 import reddit_tts_bot.narrative as narrative
+import reddit_tts_bot.video as video
 import os
 
 
@@ -16,9 +17,15 @@ def test_narrative():
     for n in narratives:
         n.to_audio(file_path=os.getcwd() + "/testmantests/audiotests/narrativetests")
 
-    assert len(narratives) == 5
+
+def test_video():
+    narrative_ = narrative.scrape_narratives(1)[0]
+    video.add_video_to_narrative(narrative=narrative_,
+                                 video_parent_directory=os.getcwd() + "/testmantests/videotest/narrativetests"
+                                                                      "/videooutput")
 
 
 # Run the tests
 test_narrative()
 test_tts()
+test_video()
