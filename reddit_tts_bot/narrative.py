@@ -157,6 +157,9 @@ def scrape_narratives(num_narratives: int, min_word_count: int = DEFAULT_MIN_WOR
                 i -= 1
                 continue
 
+            # Add the title to the beginning of the content so that it is spoken
+            content = title + ". " + content
+
             # Create a Narrative object
             narrative = Narrative(content, title)
             narratives.append(narrative)
