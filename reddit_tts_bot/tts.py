@@ -1,5 +1,8 @@
 __author__ = "Jackson Eshbaugh"
 __version__ = "05/22/2024"
+"""
+This file contains code pertaining to text-to-speech (TTS) functionality for the Reddit TTS Bot.
+"""
 
 import os
 

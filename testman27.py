@@ -1,5 +1,3 @@
-# test tts module
-
 import reddit_tts_bot.tts as tts
 import reddit_tts_bot.narrative as narrative
 import reddit_tts_bot.video as video
@@ -21,7 +19,7 @@ def test_narrative():
 def test_video():
     narrative_ = narrative.scrape_narratives(1)[0]
     video.add_video_to_narrative(narrative=narrative_,
-                                 video_parent_directory=os.getcwd() + "/testmantests/videotest/narrativetests"
+                                 video_directory=os.getcwd() + "/testmantests/videotest/narrativetests"
                                                                       "/videooutput")
 
 

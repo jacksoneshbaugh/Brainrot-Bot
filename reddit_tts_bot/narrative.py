@@ -1,5 +1,8 @@
 __author__ = "Jackson Eshbaugh"
 __version__ = "05/23/2024"
+"""
+This file contains code pertaining to narrative generation for the Reddit TTS Bot (including scraping from Reddit).
+"""
 
 import os
 import random
