@@ -1,6 +1,10 @@
 import os
 import random
 import moviepy.editor as mp
+from moviepy.video.VideoClip import VideoClip
+from moviepy.audio.io.AudioFileClip import AudioFileClip
+from moviepy.video.VideoClip import VideoClip
+from moviepy.video.io.VideoFileClip import VideoFileClip
 
 from reddit_tts_bot.narrative import Narrative
 
@@ -38,8 +42,8 @@ def add_video_to_narrative(narrative: Narrative, video_parent_directory: str = "
         if random_video is None:
             raise FileNotFoundError("No videos found in the videos directory.")
 
-        video = mp.VideoFileClip("videos" + os.sep + random_video)
-        audio = mp.AudioFileClip(os.getcwd() + os.sep + "reddit_tts_bot_temp" + os.sep + audio_file)
+        video: VideoFileClip(VideoClip) = mp.VideoFileClip("videos" + os.sep + random_video)
+        audio: AudioFileClip = mp.AudioFileClip(os.getcwd() + os.sep + "reddit_tts_bot_temp" + os.sep + audio_file)
 
         while video.duration < audio.duration:
             random_video = get_random_video()
@@ -52,8 +56,12 @@ def add_video_to_narrative(narrative: Narrative, video_parent_directory: str = "
         # Overwrite any existing audio in the video with the new audio
         video = video.set_audio(audio)
 
+        # Resize the video to the desired height while maintaining aspect ratio
+        video = video.resize(height=1920)
+
         # Crop the video to 1080x1920 (9:16 aspect ratio)
-        video = video.crop(x1=0, y1=0, x2=1920, y2=1080)
+        # The crop will be centered, so x1 will be (video.size[0]-1080)/2
+        video = video.crop(x1=(video.size[0] - 1080) / 2, width=1080)
 
         # Write the new video to the output directory
         output_directory = video_parent_directory + os.sep + audio_file[:len(audio_file) - 4] + ".mp4"

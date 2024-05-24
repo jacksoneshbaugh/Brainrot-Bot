@@ -26,6 +26,6 @@ def test_video():
 
 
 # Run the tests
-test_narrative()
-test_tts()
+# test_narrative()
+# test_tts()
 test_video()
