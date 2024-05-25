@@ -17,5 +17,5 @@
   - [x] Add audio captions to the gameplay video.
     - [x] Use OpenAI Whisper and moviepy to generate and add captions.
       - [x] Burn captions into the video as text.
-- [ ] Think about if and how to distribute the Python module separately from the driver code.
-- [ ] Write the rest of README.md.
+- [x] Think about if and how to distribute the Python module separately from the driver code.
+- [x] Write the rest of README.md.
