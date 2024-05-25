@@ -21,7 +21,6 @@ def generate_brainrot(num_brainrot: int = 1):
 
     narratives = rtb.narrative.scrape_narratives(num_brainrot, min_word_count=config.MIN_WORD_COUNT, locations=config.REDDIT_SUBREDDITS)
     for narrative in narratives:
-        narrative.to_audio(config.OUTPUT_DIRECTORY)
         rtb.video.add_video_to_narrative(narrative=narrative, video_directory=config.OUTPUT_DIRECTORY)
 
     print("Brainrot video(s) generated! Enjoy, but don't get too brainrotted!")
