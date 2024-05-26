@@ -1,5 +1,9 @@
 # TO-DO
 
+The following is a copy of the `TODO.md` file from when `reddit-tts-bot` was a part of this project.
+
+----
+
 - [x] Pull narratives to make into shorts from Reddit.
   - [x] Decide on what qualifies to be pulled into a short.
     - [x] Minimum word count = 100.
